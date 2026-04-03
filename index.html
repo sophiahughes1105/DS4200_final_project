@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Massachusetts Graduation Disparities</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Graduation Disparities in Massachusetts</h1>
+        <p>
+            This project explores how graduation rates vary across Massachusetts
+            school districts and how those differences may relate to
+            socioeconomic factors.
+        </p>
+    </header>
+
+    <main>
+        <section id="intro">
+            <h2>Project Overview</h2>
+            <p>
+                Graduating from high school is a major milestone, but outcomes
+                are not equal across all communities. Our project examines
+                whether graduation rates differ across Massachusetts districts
+                and how those patterns may connect to factors such as economic
+                disadvantage and student need.
+            </p>
+        </section>
+
+        <section id="map-section">
+            <h2>Interactive Map of Graduation Rates</h2>
+            <p>
+                Use the dropdown to explore graduation rates by district across
+                different years. Hover over a district to see more detail.
+            </p>
+
+            <div id="controls">
+                <label for="yearSelect">Select Year:</label>
+                <select id="yearSelect"></select>
+            </div>
+
+            <div id="map-container"></div>
+            <div id="tooltip"></div>
+        </section>
+
+        <section id="chart-section">
+            <h2>Other Visualizations</h2>
+            <p>
+                Additional charts from our project will go here.
+            </p>
+            <div id="other-chart-1"></div>
+            <div id="other-chart-2"></div>
+        </section>
+
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+            <p>
+                By comparing graduation outcomes across districts, we can better
+                understand where disparities exist and what patterns may be
+                associated with those differences.
+            </p>
+        </section>
+    </main>
+
+    <script src="map.js"></script>
+</body>
+</html>

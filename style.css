@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background: #f7f7f7;
+    color: #222;
+}
+
+h1, h2 {
+    margin-bottom: 10px;
+}
+
+#controls {
+    margin: 15px 0;
+}
+
+#map-container {
+    width: 900px;
+    margin-top: 10px;
+}
+
+svg {
+    background: white;
+    border: 1px solid #ccc;
+}
+
+#tooltip {
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

@@ -3,67 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Massachusetts Graduation Disparities</title>
+    <title>Massachusetts Graduation Disparities Study</title>
+    <link href="style.css" rel="stylesheet" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>Graduation Disparities in Massachusetts</h1>
-        <p>
-            This project explores how graduation rates vary across Massachusetts
-            school districts and how those differences may relate to
-            socioeconomic factors.
-        </p>
-    </header>
+    <h1>Massachusetts Graduation Disparities Analysis</h1>
 
-    <main>
-        <section id="intro">
-            <h2>Project Overview</h2>
-            <p>
-                Graduating from high school is a major milestone, but outcomes
-                are not equal across all communities. Our project examines
-                whether graduation rates differ across Massachusetts districts
-                and how those patterns may connect to factors such as economic
-                disadvantage and student need.
-            </p>
-        </section>
+    <h3>Overall Introduction</h3>
 
-        <section id="map-section">
-            <h2>Interactive Map of Graduation Rates</h2>
-            <p>
-                Use the dropdown to explore graduation rates by district across
-                different years. Hover over a district to see more detail.
-            </p>
+    <p>
+        Graduating from high school is a major milestone in a student’s life and often reflects
+        academic readiness for college, careers, and other post-secondary opportunities.
+        Massachusetts is one of the strongest-performing states in the country in terms of education,
+        but graduation outcomes are not the same across all schools and districts.
+    </p>
 
-            <div id="controls">
-                <label for="yearSelect">Select Year:</label>
-                <select id="yearSelect"></select>
+    <p>
+        Differences in graduation rates may reflect broader inequalities in educational access,
+        district resources, and student support systems. Some districts consistently report very high
+        graduation rates, while others face lower outcomes that may be associated with higher levels
+        of student need, economic disadvantage, or other demographic factors.
+    </p>
+
+    <p>
+        Understanding these disparities is important because graduation is not just an education
+        outcome. It is also connected to long-term economic opportunity, workforce readiness,
+        college access, and social mobility. By examining geographic and social patterns in the data,
+        we can better understand how student outcomes vary across Massachusetts.
+    </p>
+
+    <p>
+        To learn more about Massachusetts education data, you can visit the
+        <a href="https://www.doe.mass.edu/" target="_blank">Massachusetts Department of Elementary and Secondary Education</a>.
+        For district boundary data used in the map, we use information from
+        <a href="https://www.mass.gov/orgs/massgis-bureau-of-geographic-information" target="_blank">MassGIS</a>.
+    </p>
+
+    <h3>Introduction to the Data</h3>
+
+    <p>
+        Our project uses several datasets from the Massachusetts Department of Elementary and Secondary
+        Education from 2017 through 2022. These datasets provide school-level information related to
+        student demographics, socioeconomic characteristics, graduation outcomes, SAT performance,
+        and postsecondary attendance.
+    </p>
+
+    <p>
+        The individual datasets used in this project are:
+    </p>
+
+    <div class="center">
+        <table class="tg">
+            <thead>
+                <tr>
+                    <th class="tg-0lax">Dataset</th>
+                    <th class="tg-0lax">Size</th>
+                    <th class="tg-0lax">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tg-0lax">Enrollment by Gender</td>
+                    <td class="tg-0lax">11072 rows × 13 columns</td>
+                    <td class="tg-0lax">Enrollment counts by gender and year</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">Socioeconomic Data</td>
+                    <td class="tg-0lax">11055 rows × 15 columns</td>
+                    <td class="tg-0lax">High needs, English learners, economically disadvantaged, and related variables</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">College Attendance</td>
+                    <td class="tg-0lax">2397 rows × 13 columns</td>
+                    <td class="tg-0lax">Percent of graduates attending college or university</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">Graduation Rates</td>
+                    <td class="tg-0lax">2335 rows × 10 columns</td>
+                    <td class="tg-0lax">Graduation outcomes by school and year</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">SAT</td>
+                    <td class="tg-0lax">2171 rows × 7 columns</td>
+                    <td class="tg-0lax">SAT participation and performance measures</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        These five datasets were manually appended by school and year to create one combined dataset.
+        The combined dataset has a size of 11072 rows and 46 columns. It includes school enrollment
+        demographics, SAT measures, graduation rates, college attendance rates, and socioeconomic
+        factors for schools across a five-year period.
+    </p>
+
+    <p>
+        To better match the focus of our project, the full dataset was filtered to only include high
+        schools. This reduces the dataset to approximately 2300 rows and allows us to focus on the
+        schools that directly report graduation-related outcomes. Filtering in this way also makes the
+        final dataset cleaner and more relevant for analyzing graduation disparities.
+    </p>
+
+    <p>
+        In addition to the education datasets, we also use school district geographic boundary data
+        from MassGIS. This geographic data allows us to create an interactive map of Massachusetts
+        school districts so that users can explore regional differences in graduation outcomes.
+    </p>
+
+    <p>
+        The map below shows graduation rates across Massachusetts districts. Users can change the year
+        using the dropdown and hover over each district to see more detailed district-level
+        information.
+    </p>
+
+    <div class="center">
+        <div id="controls">
+            <label for="yearSelect">Select Year:</label>
+            <select id="yearSelect"></select>
+        </div>
+
+        <div id="map-container"></div>
+        <div id="tooltip"></div>
+    </div>
+
+    <p>
+        In general, the interactive map highlights that graduation outcomes are not evenly distributed
+        across Massachusetts. Some districts consistently report stronger graduation outcomes, while
+        others appear lower, suggesting that place-based and socioeconomic differences may matter.
+    </p>
+
+    <h3>Add Heading</h3>
+
+    <div class="container">
+        <div class="image">
+            <div class="placeholder-box">
+                <p>To be added: Visualization</p>
             </div>
+        </div>
+        <div class="text">
+            <p>To be added: explanation.</p>
+        </div>
+    </div>
 
-            <div id="map-container"></div>
-            <div id="tooltip"></div>
-        </section>
+    <h3>Add Heading</h3>
 
-        <section id="chart-section">
-            <h2>Other Visualizations</h2>
-            <p>
-                Additional charts from our project will go here.
-            </p>
-            <div id="other-chart-1"></div>
-            <div id="other-chart-2"></div>
-        </section>
+    <div class="container">
+        <div class="text">
+            <p>To be added: explanation.</p>
+        </div>
+        <div class="image">
+            <div class="placeholder-box">
+                <p>To be added: Visualization</p>
+            </div>
+        </div>
+    </div>
 
-        <section id="conclusion">
-            <h2>Conclusion</h2>
-            <p>
-                By comparing graduation outcomes across districts, we can better
-                understand where disparities exist and what patterns may be
-                associated with those differences.
-            </p>
-        </section>
-    </main>
+    <p>To be added: explanation.</p>
+
+    <div class="center">
+        <div class="placeholder-box large">
+            <p>To be added: Visualization</p>
+        </div>
+    </div>
+
+    <h3>Add Heading</h3>
+
+    <p>To be added: explanation.</p>
+
+    <div class="center">
+        <div class="placeholder-box">
+            <p>To be added: Visualization</p>
+        </div>
+    </div>
+
+    <h3>Summary and Additional Work</h3>
+
+    <p>
+        In this project, we analyze graduation disparities across Massachusetts school districts and
+        examine how these differences may relate to broader student and district characteristics.
+    </p>
+
+    <p>
+        Our interactive map provides one way to explore how graduation rates vary geographically across
+        the state. Additional visualizations will help further explain these patterns and compare
+        graduation outcomes with other education and socioeconomic variables.
+    </p>
+
+    <p>To be added: explanation.</p>
 
     <script src="map.js"></script>
 </body>

@@ -59,6 +59,8 @@ function clean_name(name) {
     return name
         .toLowerCase()
         .replace(/[-–]/g, " ")
+        .replace(/\(district\)/g, "")
+        .replace(/\(charter\)/g, "")
         .replace(/public schools?/g, "")
         .replace(/school district/g, "")
         .replace(/district/g, "")
@@ -69,20 +71,58 @@ function clean_name(name) {
 }
 
 
-// helper for matching geo feature to district data
-function get_match_for_feature(feature, district_data, district_data_by_name) {
+// build lookup from member town -> regional district code
+function build_member_town_lookup(geo_data) {
+    let member_town_to_regional_code = {};
+
+    geo_data.features.forEach(function(feature) {
+        let district_code = String(feature.properties.ORG4CODE || "").padStart(4, "0");
+        let member_list = feature.properties.MEMBERLIST;
+        let district_name = feature.properties.DISTRICT_N || "";
+        let clean_district_name = clean_name(district_name);
+
+        if (!member_list) {
+            return;
+        }
+
+        let members = member_list.split(",").map(function(name) {
+            return clean_name(name);
+        });
+
+        // use only true multi-town regional relationships
+        if (members.length > 1) {
+            members.forEach(function(member_name) {
+                if (member_name && member_name !== clean_district_name) {
+                    member_town_to_regional_code[member_name] = district_code;
+                }
+            });
+        }
+    });
+
+    return member_town_to_regional_code;
+}
+
+
+// helper for matching a map feature to district data
+function get_match_for_feature(feature, district_data, district_data_by_name, member_town_to_regional_code) {
     let code = String(feature.properties.ORG4CODE || "").padStart(4, "0");
     let geo_name = feature.properties.DISTRICT_N || "";
     let clean_geo_name = clean_name(geo_name);
 
-    // first try district code
+    // 1. direct code match
     if (district_data[code]) {
         return district_data[code];
     }
 
-    // then try cleaned name
+    // 2. direct cleaned-name match
     if (district_data_by_name[clean_geo_name]) {
         return district_data_by_name[clean_geo_name];
+    }
+
+    // 3. if this town belongs to a regional district, inherit that district's data
+    let regional_code = member_town_to_regional_code[clean_geo_name];
+    if (regional_code && district_data[regional_code]) {
+        return district_data[regional_code];
     }
 
     return null;
@@ -241,6 +281,9 @@ function make_map(csv_data, geo_data) {
 
     let path = d3.geoPath().projection(projection);
 
+    let member_town_to_regional_code = build_member_town_lookup(geo_data);
+    console.log("Member town lookup:", member_town_to_regional_code);
+
     update_map(selected_year);
 
     year_select.on("change", function() {
@@ -347,7 +390,12 @@ function make_map(csv_data, geo_data) {
             let code = String(d.properties.ORG4CODE || "").padStart(4, "0");
             let geo_name = d.properties.DISTRICT_N;
 
-            let match = get_match_for_feature(d, district_data, district_data_by_name);
+            let match = get_match_for_feature(
+                d,
+                district_data,
+                district_data_by_name,
+                member_town_to_regional_code
+            );
 
             if (!match) {
                 no_match.push({
@@ -397,7 +445,12 @@ function make_map(csv_data, geo_data) {
             .join("path")
             .attr("d", path)
             .attr("fill", function(d) {
-                let match = get_match_for_feature(d, district_data, district_data_by_name);
+                let match = get_match_for_feature(
+                    d,
+                    district_data,
+                    district_data_by_name,
+                    member_town_to_regional_code
+                );
 
                 if (match && !isNaN(match.grad_rate)) {
                     return color_scale(match.grad_rate);
@@ -414,7 +467,13 @@ function make_map(csv_data, geo_data) {
 
                 let code = String(d.properties.ORG4CODE || "").padStart(4, "0");
                 let geo_name = d.properties.DISTRICT_N;
-                let match = get_match_for_feature(d, district_data, district_data_by_name);
+
+                let match = get_match_for_feature(
+                    d,
+                    district_data,
+                    district_data_by_name,
+                    member_town_to_regional_code
+                );
 
                 if (match) {
                     tooltip

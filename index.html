@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Massachusetts Graduation Disparities Analysis</title>
+    <link href="style.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <h1>Massachusetts Graduation Disparities Analysis</h1>
+
+    <h3>Overall Introduction</h3>
+
+    <p>
+        Graduating from high school is a major milestone in a student’s life and often reflects
+        academic readiness for college, careers, and other post-secondary opportunities.
+        Massachusetts is one of the strongest-performing states in the country in terms of education,
+        but graduation outcomes are not the same across all schools and districts.
+    </p>
+
+    <p>
+        Differences in graduation rates may reflect broader inequalities in educational access,
+        district resources, and student support systems. Some districts consistently report very high
+        graduation rates, while others face lower outcomes that may be associated with higher levels
+        of student need, economic disadvantage, or other demographic factors.
+    </p>
+
+    <p>
+        These differences raise questions about what socioeconomic factors contribute to graduation outcomes.
+        Examining these variations is important because it can help identify how such factors influence student
+        success and contribute to a more equitable education system.
+    </p>
+
+    <p>
+        To learn more about Massachusetts education data, you can visit the
+        <a href="https://www.doe.mass.edu/" target="_blank">
+            Massachusetts Department of Elementary and Secondary Education
+        </a>.
+    </p>
+
+    <h3>Introduction to the Data</h3>
+
+    <p>
+        Our project uses several datasets from the Massachusetts Department of Elementary and Secondary
+        Education from 2017 through 2022. These datasets provide school-level information related to
+        student demographics, socioeconomic characteristics, graduation outcomes, SAT performance,
+        and postsecondary attendance.
+    </p>
+
+    <p>
+        The detailed information about the features is listed in the following table:
+    </p>
+
+    <div class="center">
+        <table class="tg">
+            <thead>
+                <tr>
+                    <th class="tg-0lax">Variable Name</th>
+                    <th class="tg-0lax">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tg-0lax">Enrollment_Gender</td>
+                    <td class="tg-0lax">Enrollment counts by gender and year (11072 rows × 13 columns)</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">Socioeconomic</td>
+                    <td class="tg-0lax">High needs, English learners, economically disadvantaged, and related variables (11055 rows × 15 columns)</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">College_Attendance</td>
+                    <td class="tg-0lax">Percent of graduates attending college or university (2397 rows × 13 columns)</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">Graduation_Rates</td>
+                    <td class="tg-0lax">Graduation outcomes by school and year (2335 rows × 10 columns)</td>
+                </tr>
+                <tr>
+                    <td class="tg-0lax">SAT</td>
+                    <td class="tg-0lax">SAT participation and performance measures (2171 rows × 7 columns)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>
+        In addition to the educational datasets, geographic information is essential for visualizing patterns
+        across school districts. Therefore, we incorporate spatial data from
+        <a href="https://www.mass.gov/orgs/massgis-bureau-of-geographic-information" target="_blank">
+            MassGIS
+        </a>,
+        which provides official geographic boundary files for Massachusetts. Specifically, we use MassGIS data
+        to obtain district-level polygons, enabling accurate mapping and spatial analysis of graduation rates
+        and related variables across the state.
+    </p>
+
+    <p>
+        The datasets were merged on school and year, filtered to high schools, and cleaned by addressing
+        missing values through removal or imputation to create a consistent, analysis-ready dataset.
+    </p>
+
+    <h3>Graduation Rates by District</h3>
+
+    <p>
+        The map below shows graduation rates across Massachusetts school districts. Users can select a year
+        from the dropdown menu and hover over each district to view more detailed district-level information.
+    </p>
+
+    <div class="center">
+        <div id="controls">
+            <label for="yearSelect">Select Year:</label>
+            <select id="yearSelect"></select>
+        </div>
+
+        <div id="map-container"></div>
+        <div id="tooltip"></div>
+    </div>
+
+    <p>
+        The map suggests that graduation outcomes are not evenly distributed across Massachusetts. Some districts
+        consistently report stronger graduation rates, while others show lower outcomes, indicating that geography
+        and district-level conditions may play an important role in student success.
+    </p>
+
+    <h3>SAT Scores and Graduation Rates by Race (2019 - 2022)</h3>
+
+    <div class="container">
+        <div class="image">
+            <iframe src="sat_chart.html"
+                    width="900"
+                    height="450"
+                    frameborder="0"
+                    scrolling="no">
+            </iframe>
+        </div>
+        <div class="text">
+            <p>
+                This visualization compares SAT performance and graduation rates across racial groups from
+                2019 to 2022, highlighting differences in academic outcomes and trends over time.
+            </p>
+        </div>
+    </div>
+
+    <h3>Graduation Rates vs. Percent Low Income by District</h3>
+
+    <div class="container">
+        <div class="image">
+            <iframe src="low_Income_scatter.html"
+                    width="800"
+                    height="600"
+                    frameborder="0"
+                    scrolling="no">
+            </iframe>
+        </div>
+        <div class="text">
+            <p>
+                This scatter plot explores the relationship between graduation rates and the percentage of
+                low-income students, helping identify patterns between economic disadvantage and student outcomes.
+            </p>
+        </div>
+    </div>
+
+    <h3>Summary and Additional Work</h3>
+
+    <p>
+        In this project, we analyze graduation disparities across Massachusetts school districts and examine
+        how these differences relate to socioeconomic and demographic factors.
+    </p>
+
+    <p>
+        While the visualizations reveal meaningful patterns, future work could expand the analysis by testing
+        relationships statistically and incorporating additional variables over time.
+    </p>
+
+</body>
+</html>

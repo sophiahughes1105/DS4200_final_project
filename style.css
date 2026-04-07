@@ -1,28 +1,77 @@
 body {
+    width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px 20px 20px;
+    border: 3px solid black;
     font-family: Arial, sans-serif;
-    margin: 30px;
     background: #f7f7f7;
     color: #222;
 }
-
-h1, h2 {
+h1 {
+    margin: 0;
+    padding: 20px 0;
+    color: black;
+    text-align: center;
+}
+h2, h3 {
     margin-bottom: 10px;
 }
-
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+.tg .tg-0lax {
+    text-align: left;
+    vertical-align: top;
+}
+.center {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+.container {
+    align-items: center;
+    display: flex;
+}
+.image {
+    flex: 0 0 65%;
+    margin-right: 20px;
+}
+.text {
+    flex: 1;
+}
 #controls {
     margin: 15px 0;
 }
-
 #map-container {
     width: 900px;
     margin-top: 10px;
 }
-
 svg {
     background: white;
     border: 1px solid #ccc;
 }
-
 #tooltip {
     font-size: 14px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);

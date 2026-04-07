@@ -2,14 +2,14 @@ Promise.all([
     d3.csv("AllSchool_17_22.csv"),
     d3.json("SCHOOLDISTRICTS_POLY.json")
 ]).then(function(files) {
-    let csvData = files[0];
-    let geoData = files[1];
+    let csv_data = files[0];
+    let geo_data = files[1];
 
-    console.log("CSV rows:", csvData.length);
-    console.log("Geo features:", geoData.features.length);
-    console.log("First geo properties:", geoData.features[0].properties);
+    console.log("CSV rows:", csv_data.length);
+    console.log("Geo features:", geo_data.features.length);
+    console.log("First geo properties:", geo_data.features[0].properties);
 
-    makeMap(csvData, geoData);
+    make_map(csv_data, geo_data);
 }).catch(function(error) {
     console.log("Error loading files:", error);
 });
@@ -38,20 +38,20 @@ let svg = d3.select("#map-container")
 
 
 // turn school code into district code
-function getDistrictCodeFromSchoolCode(schoolCode) {
-    let code = Number(schoolCode);
+function get_district_code_from_school_code(school_code) {
+    let code = Number(school_code);
 
     if (isNaN(code)) {
         return null;
     }
 
-    let districtCode = Math.floor(code / 10000);
-    return String(districtCode).padStart(4, "0");
+    let district_code = Math.floor(code / 10000);
+    return String(district_code).padStart(4, "0");
 }
 
 
 // clean district names for fallback matching
-function cleanName(name) {
+function clean_name(name) {
     if (!name) {
         return "";
     }
@@ -69,123 +69,144 @@ function cleanName(name) {
 }
 
 
+// helper for matching geo feature to district data
+function get_match_for_feature(feature, district_data, district_data_by_name) {
+    let code = String(feature.properties.ORG4CODE || "").padStart(4, "0");
+    let geo_name = feature.properties.DISTRICT_N || "";
+    let clean_geo_name = clean_name(geo_name);
+
+    // first try district code
+    if (district_data[code]) {
+        return district_data[code];
+    }
+
+    // then try cleaned name
+    if (district_data_by_name[clean_geo_name]) {
+        return district_data_by_name[clean_geo_name];
+    }
+
+    return null;
+}
+
+
 // draw legend
-function drawLegend(colorScale, minRate, maxRate) {
-    svg.selectAll(".legend-group").remove();
+function draw_legend(color_scale, min_rate, max_rate) {
+    svg.selectAll(".legend_group").remove();
 
-    let legendWidth = 240;
-    let legendHeight = 16;
-    let legendX = 40;
-    let legendY = 40;
+    let legend_width = 240;
+    let legend_height = 16;
+    let legend_x = 40;
+    let legend_y = 40;
 
-    let legendGroup = svg.append("g")
-        .attr("class", "legend-group");
+    let legend_group = svg.append("g")
+        .attr("class", "legend_group");
 
     let defs = svg.select("defs");
     if (defs.empty()) {
         defs = svg.append("defs");
     }
 
-    defs.select("#legend-gradient").remove();
+    defs.select("#legend_gradient").remove();
 
     let gradient = defs.append("linearGradient")
-        .attr("id", "legend-gradient")
+        .attr("id", "legend_gradient")
         .attr("x1", "0%")
         .attr("x2", "100%")
         .attr("y1", "0%")
         .attr("y2", "0%");
 
-    let numStops = 20;
+    let num_stops = 20;
 
-    for (let i = 0; i <= numStops; i++) {
-        let t = i / numStops;
-        let value = minRate + t * (maxRate - minRate);
+    for (let i = 0; i <= num_stops; i++) {
+        let t = i / num_stops;
+        let value = min_rate + t * (max_rate - min_rate);
 
         gradient.append("stop")
             .attr("offset", (t * 100) + "%")
-            .attr("stop-color", colorScale(value));
+            .attr("stop-color", color_scale(value));
     }
 
-    legendGroup.append("text")
-        .attr("x", legendX)
-        .attr("y", legendY - 10)
+    legend_group.append("text")
+        .attr("x", legend_x)
+        .attr("y", legend_y - 10)
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Graduation Rate");
 
-    legendGroup.append("rect")
-        .attr("x", legendX)
-        .attr("y", legendY)
-        .attr("width", legendWidth)
-        .attr("height", legendHeight)
-        .attr("fill", "url(#legend-gradient)")
+    legend_group.append("rect")
+        .attr("x", legend_x)
+        .attr("y", legend_y)
+        .attr("width", legend_width)
+        .attr("height", legend_height)
+        .attr("fill", "url(#legend_gradient)")
         .attr("stroke", "#333")
         .attr("stroke-width", 0.5);
 
-    let legendScale = d3.scaleLinear()
-        .domain([minRate, maxRate])
-        .range([legendX, legendX + legendWidth]);
+    let legend_scale = d3.scaleLinear()
+        .domain([min_rate, max_rate])
+        .range([legend_x, legend_x + legend_width]);
 
-    let legendAxis = d3.axisBottom(legendScale)
+    let legend_axis = d3.axisBottom(legend_scale)
         .ticks(5)
         .tickFormat(function(d) {
             return d.toFixed(0) + "%";
         });
 
-    legendGroup.append("g")
-        .attr("transform", "translate(0," + (legendY + legendHeight) + ")")
-        .call(legendAxis);
+    legend_group.append("g")
+        .attr("transform", "translate(0," + (legend_y + legend_height) + ")")
+        .call(legend_axis);
 }
 
 
-function makeMap(csvData, geoData) {
+function make_map(csv_data, geo_data) {
 
     // clean csv
-    csvData.forEach(function(d) {
+    csv_data.forEach(function(d) {
         d.year = parseFloat(d.year);
-        d.gradRate = parseFloat(d["% Graduated"]);
+        d.grad_rate = parseFloat(d["% Graduated"]);
         d.cohort = parseFloat(d["# in Cohort"]);
 
         d.econ = parseFloat(d["Economically Disadvantaged%"]);
-        d.highNeeds = parseFloat(d["High Needs%"]);
+        d.high_needs = parseFloat(d["High Needs%"]);
         d.english = parseFloat(d["English Learners%"]);
 
-        d.schoolCode = d["School Code"];
-        d.org4 = getDistrictCodeFromSchoolCode(d.schoolCode);
+        d.school_code = d["School Code"];
+        d.org4 = get_district_code_from_school_code(d.school_code);
 
         if (d["School Name"]) {
             d.district = d["School Name"].split(" - ")[0].trim();
-            d.cleanDistrict = cleanName(d.district);
+            d.clean_district = clean_name(d.district);
         } else {
             d.district = "";
-            d.cleanDistrict = "";
+            d.clean_district = "";
         }
     });
 
-    console.log("Metric parse check:",
-        csvData.slice(0, 15).map(function(d) {
+    console.log(
+        "Metric parse check:",
+        csv_data.slice(0, 15).map(function(d) {
             return {
                 school: d["School Name"],
                 year: d.year,
-                gradRate: d.gradRate,
+                grad_rate: d.grad_rate,
                 econ: d.econ,
-                highNeeds: d.highNeeds,
+                high_needs: d.high_needs,
                 english: d.english
             };
         })
     );
 
     // keep rows with valid district code and year
-    let gradData = csvData.filter(function(d) {
+    let grad_data = csv_data.filter(function(d) {
         return !isNaN(d.year) && d.org4 !== null;
     });
 
-    console.log("Filtered rows:", gradData.length);
-    console.log("Sample csv row:", gradData[0]);
+    console.log("Filtered rows:", grad_data.length);
+    console.log("Sample csv row:", grad_data[0]);
 
     // unique years
     let years = [];
-    gradData.forEach(function(d) {
+    grad_data.forEach(function(d) {
         if (!years.includes(d.year)) {
             years.push(d.year);
         }
@@ -195,11 +216,11 @@ function makeMap(csvData, geoData) {
         return a - b;
     });
 
-    let yearSelect = d3.select("#yearSelect");
+    let year_select = d3.select("#yearSelect");
 
-    yearSelect.selectAll("option").remove();
+    year_select.selectAll("option").remove();
 
-    yearSelect.selectAll("option")
+    year_select.selectAll("option")
         .data(years)
         .enter()
         .append("option")
@@ -210,151 +231,176 @@ function makeMap(csvData, geoData) {
             return d;
         });
 
-    let selectedYear = years[years.length - 1];
-    yearSelect.property("value", selectedYear);
+    let selected_year = years[years.length - 1];
+    year_select.property("value", selected_year);
 
     // projected coordinates from MassGIS
     let projection = d3.geoIdentity()
         .reflectY(true)
-        .fitSize([width, height], geoData);
+        .fitSize([width, height], geo_data);
 
     let path = d3.geoPath().projection(projection);
 
-    updateMap(selectedYear);
+    update_map(selected_year);
 
-    yearSelect.on("change", function() {
-        selectedYear = +this.value;
-        updateMap(selectedYear);
+    year_select.on("change", function() {
+        selected_year = +this.value;
+        update_map(selected_year);
     });
 
-    function updateMap(year) {
+    function update_map(year) {
 
-        let oneYearData = gradData.filter(function(d) {
+        let one_year_data = grad_data.filter(function(d) {
             return d.year === year;
         });
 
-        console.log("Rows for year", year, oneYearData.length);
+        console.log("Rows for year", year, one_year_data.length);
 
-        let districtSums = {};
-        let districtInfo = {};
+        let district_sums = {};
+        let district_info = {};
 
-        oneYearData.forEach(function(d) {
+        one_year_data.forEach(function(d) {
             let code = d.org4;
 
-            if (!districtSums[code]) {
-                districtSums[code] = {
-                    gradWeightedSum: 0,
-                    gradCohortSum: 0,
+            if (!district_sums[code]) {
+                district_sums[code] = {
+                    grad_weighted_sum: 0,
+                    grad_cohort_sum: 0,
 
-                    econWeightedSum: 0,
-                    econCount: 0,
+                    econ_weighted_sum: 0,
+                    econ_count: 0,
 
-                    highNeedsWeightedSum: 0,
-                    highNeedsCount: 0,
+                    high_needs_weighted_sum: 0,
+                    high_needs_count: 0,
 
-                    englishWeightedSum: 0,
-                    englishCount: 0
+                    english_weighted_sum: 0,
+                    english_count: 0
                 };
 
-                districtInfo[code] = {
-                    districtName: d.district,
-                    cleanDistrict: d.cleanDistrict
+                district_info[code] = {
+                    district_name: d.district,
+                    clean_district: d.clean_district
                 };
             }
 
-            if (!isNaN(d.gradRate) && !isNaN(d.cohort) && d.cohort > 0) {
-                districtSums[code].gradWeightedSum += d.gradRate * d.cohort;
-                districtSums[code].gradCohortSum += d.cohort;
+            if (!isNaN(d.grad_rate) && !isNaN(d.cohort) && d.cohort > 0) {
+                district_sums[code].grad_weighted_sum += d.grad_rate * d.cohort;
+                district_sums[code].grad_cohort_sum += d.cohort;
             }
 
             if (!isNaN(d.econ)) {
-                districtSums[code].econWeightedSum += d.econ;
-                districtSums[code].econCount += 1;
+                district_sums[code].econ_weighted_sum += d.econ;
+                district_sums[code].econ_count += 1;
             }
 
-            if (!isNaN(d.highNeeds)) {
-                districtSums[code].highNeedsWeightedSum += d.highNeeds;
-                districtSums[code].highNeedsCount += 1;
+            if (!isNaN(d.high_needs)) {
+                district_sums[code].high_needs_weighted_sum += d.high_needs;
+                district_sums[code].high_needs_count += 1;
             }
 
             if (!isNaN(d.english)) {
-                districtSums[code].englishWeightedSum += d.english;
-                districtSums[code].englishCount += 1;
+                district_sums[code].english_weighted_sum += d.english;
+                district_sums[code].english_count += 1;
             }
         });
 
-        let districtData = {};
+        let district_data = {};
 
-        for (let code in districtSums) {
-            districtData[code] = {
-                gradRate: districtSums[code].gradCohortSum > 0
-                    ? districtSums[code].gradWeightedSum / districtSums[code].gradCohortSum
+        for (let code in district_sums) {
+            district_data[code] = {
+                grad_rate: district_sums[code].grad_cohort_sum > 0
+                    ? district_sums[code].grad_weighted_sum / district_sums[code].grad_cohort_sum
                     : NaN,
 
-                econ: districtSums[code].econCount > 0
-                    ? districtSums[code].econWeightedSum / districtSums[code].econCount
+                econ: district_sums[code].econ_count > 0
+                    ? district_sums[code].econ_weighted_sum / district_sums[code].econ_count
                     : NaN,
 
-                highNeeds: districtSums[code].highNeedsCount > 0
-                    ? districtSums[code].highNeedsWeightedSum / districtSums[code].highNeedsCount
+                high_needs: district_sums[code].high_needs_count > 0
+                    ? district_sums[code].high_needs_weighted_sum / district_sums[code].high_needs_count
                     : NaN,
 
-                english: districtSums[code].englishCount > 0
-                    ? districtSums[code].englishWeightedSum / districtSums[code].englishCount
+                english: district_sums[code].english_count > 0
+                    ? district_sums[code].english_weighted_sum / district_sums[code].english_count
                     : NaN,
 
-                cohort: districtSums[code].gradCohortSum,
-                districtName: districtInfo[code].districtName,
-                cleanDistrict: districtInfo[code].cleanDistrict
+                cohort: district_sums[code].grad_cohort_sum,
+                district_name: district_info[code].district_name,
+                clean_district: district_info[code].clean_district
             };
         }
 
         // fallback lookup by cleaned district name
-        let districtDataByName = {};
-        for (let code in districtData) {
-            let cleanDistrict = districtData[code].cleanDistrict;
-            if (cleanDistrict) {
-                districtDataByName[cleanDistrict] = districtData[code];
+        let district_data_by_name = {};
+        for (let code in district_data) {
+            let clean_district = district_data[code].clean_district;
+            if (clean_district) {
+                district_data_by_name[clean_district] = district_data[code];
             }
         }
 
-        let gradRates = [];
-        for (let code in districtData) {
-            if (!isNaN(districtData[code].gradRate)) {
-                gradRates.push(districtData[code].gradRate);
+        // debug null districts
+        let no_match = [];
+        let no_grad_rate = [];
+
+        geo_data.features.forEach(function(d) {
+            let code = String(d.properties.ORG4CODE || "").padStart(4, "0");
+            let geo_name = d.properties.DISTRICT_N;
+
+            let match = get_match_for_feature(d, district_data, district_data_by_name);
+
+            if (!match) {
+                no_match.push({
+                    name: geo_name,
+                    code: code
+                });
+            } else if (isNaN(match.grad_rate)) {
+                no_grad_rate.push({
+                    name: geo_name,
+                    code: code
+                });
+            }
+        });
+
+        console.log("NO MATCH (join issue):", no_match);
+        console.log("MATCH BUT NO DATA:", no_grad_rate);
+        console.log("NULL DISTRICT NAMES:", no_match.map(function(d) {
+            return d.name;
+        }));
+        console.log("NO DATA DISTRICT NAMES:", no_grad_rate.map(function(d) {
+            return d.name;
+        }));
+
+        let grad_rates = [];
+        for (let code in district_data) {
+            if (!isNaN(district_data[code].grad_rate)) {
+                grad_rates.push(district_data[code].grad_rate);
             }
         }
 
-        let minRate = d3.min(gradRates);
-        let maxRate = d3.max(gradRates);
+        let min_rate = d3.min(grad_rates);
+        let max_rate = d3.max(grad_rates);
 
-        console.log("Min grad rate:", minRate);
-        console.log("Max grad rate:", maxRate);
+        console.log("Min grad rate:", min_rate);
+        console.log("Max grad rate:", max_rate);
 
-        let colorScale = d3.scaleSequential()
-            .domain([minRate, maxRate])
+        let color_scale = d3.scaleSequential()
+            .domain([min_rate, max_rate])
             .interpolator(function(t) {
                 return d3.interpolateViridis(1 - t);
             });
 
-        drawLegend(colorScale, minRate, maxRate);
+        draw_legend(color_scale, min_rate, max_rate);
 
         svg.selectAll("path")
-            .data(geoData.features)
+            .data(geo_data.features)
             .join("path")
             .attr("d", path)
             .attr("fill", function(d) {
-                let code = d.properties.ORG4CODE;
-                let match = districtData[code];
+                let match = get_match_for_feature(d, district_data, district_data_by_name);
 
-                if (!match) {
-                    let geoName = d.properties.DISTRICT_N;
-                    let cleanGeoName = cleanName(geoName);
-                    match = districtDataByName[cleanGeoName];
-                }
-
-                if (match && !isNaN(match.gradRate)) {
-                    return colorScale(match.gradRate);
+                if (match && !isNaN(match.grad_rate)) {
+                    return color_scale(match.grad_rate);
                 } else {
                     return "#e6e6e6";
                 }
@@ -366,26 +412,21 @@ function makeMap(csvData, geoData) {
                     .attr("stroke", "black")
                     .attr("stroke-width", 1.5);
 
-                let code = d.properties.ORG4CODE;
-                let geoName = d.properties.DISTRICT_N;
-                let match = districtData[code];
-
-                if (!match) {
-                    let cleanGeoName = cleanName(geoName);
-                    match = districtDataByName[cleanGeoName];
-                }
+                let code = String(d.properties.ORG4CODE || "").padStart(4, "0");
+                let geo_name = d.properties.DISTRICT_N;
+                let match = get_match_for_feature(d, district_data, district_data_by_name);
 
                 if (match) {
                     tooltip
                         .style("opacity", 1)
                         .html(
-                            "<strong>" + geoName + "</strong><br>" +
+                            "<strong>" + geo_name + "</strong><br>" +
                             "District Code: " + code + "<br>" +
                             "Year: " + year + "<br>" +
-                            "Graduation Rate: " + (!isNaN(match.gradRate) ? match.gradRate.toFixed(1) + "%" : "N/A") + "<br>" +
+                            "Graduation Rate: " + (!isNaN(match.grad_rate) ? match.grad_rate.toFixed(1) + "%" : "N/A") + "<br>" +
                             "Total Cohort: " + (!isNaN(match.cohort) ? match.cohort : "N/A") + "<br>" +
                             "Economically Disadvantaged: " + (!isNaN(match.econ) ? match.econ.toFixed(1) + "%" : "Not reported for this year") + "<br>" +
-                            "High Needs: " + (!isNaN(match.highNeeds) ? match.highNeeds.toFixed(1) + "%" : "N/A") + "<br>" +
+                            "High Needs: " + (!isNaN(match.high_needs) ? match.high_needs.toFixed(1) + "%" : "N/A") + "<br>" +
                             "English Learners: " + (!isNaN(match.english) ? match.english.toFixed(1) + "%" : "N/A")
                         )
                         .style("left", (event.pageX + 12) + "px")
@@ -394,7 +435,7 @@ function makeMap(csvData, geoData) {
                     tooltip
                         .style("opacity", 1)
                         .html(
-                            "<strong>" + geoName + "</strong><br>" +
+                            "<strong>" + geo_name + "</strong><br>" +
                             "District Code: " + code + "<br>" +
                             "No graduation data available"
                         )

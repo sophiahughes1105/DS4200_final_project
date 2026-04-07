@@ -104,26 +104,41 @@ function build_member_town_lookup(geo_data) {
 
 
 // helper for matching a map feature to district data
+//
+// FIX: Steps 1 and 2 now require a valid (non-NaN) grad_rate before returning.
+// Elementary-only districts (K-8 towns like Boxford, Lincoln, Sudbury) exist in
+// district_data with NaN grad_rates, which previously short-circuited the lookup
+// before step 3 could route them to their regional HS district (Masconomet,
+// Lincoln-Sudbury, etc.). Now those towns fall through to the member-town lookup
+// and correctly inherit the regional district's graduation data.
+// Step 4 is a safety net that returns any match without grad data as a last resort,
+// preserving tooltip info for districts that genuinely have no graduation data.
 function get_match_for_feature(feature, district_data, district_data_by_name, member_town_to_regional_code) {
     let code = String(feature.properties.ORG4CODE || "").padStart(4, "0");
     let geo_name = feature.properties.DISTRICT_N || "";
     let clean_geo_name = clean_name(geo_name);
 
-    // 1. direct code match
-    if (district_data[code]) {
+    // 1. direct code match — only accept if it has real grad data
+    if (district_data[code] && !isNaN(district_data[code].grad_rate)) {
         return district_data[code];
     }
 
-    // 2. direct cleaned-name match
-    if (district_data_by_name[clean_geo_name]) {
+    // 2. direct cleaned-name match — only accept if it has real grad data
+    if (district_data_by_name[clean_geo_name] && !isNaN(district_data_by_name[clean_geo_name].grad_rate)) {
         return district_data_by_name[clean_geo_name];
     }
 
-    // 3. if this town belongs to a regional district, inherit that district's data
+    // 3. member-town -> regional district fallback
+    // handles towns like Boxford -> Masconomet, Lincoln/Sudbury -> Lincoln-Sudbury
     let regional_code = member_town_to_regional_code[clean_geo_name];
     if (regional_code && district_data[regional_code]) {
         return district_data[regional_code];
     }
+
+    // 4. last resort: return any match even without grad data
+    // (preserves tooltip info for districts that genuinely have no graduation data)
+    if (district_data[code]) return district_data[code];
+    if (district_data_by_name[clean_geo_name]) return district_data_by_name[clean_geo_name];
 
     return null;
 }

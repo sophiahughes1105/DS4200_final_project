@@ -36,6 +36,15 @@ let svg = d3.select("#map-container")
     .attr("height", height)
     .style("background", "#f5f5f5");
 
+// title
+svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", 24)
+    .attr("text-anchor", "middle")
+    .style("font-size", "18px")
+    .style("font-weight", "bold")
+    .text("Massachusetts School Districts: Graduation Rate by Year");
+
 
 // turn school code into district code
 function get_district_code_from_school_code(school_code) {
@@ -151,7 +160,7 @@ function draw_legend(color_scale, min_rate, max_rate) {
     let legend_width = 240;
     let legend_height = 16;
     let legend_x = 40;
-    let legend_y = 40;
+    let legend_y = 70; // shifted down from 40 to give title breathing room
 
     let legend_group = svg.append("g")
         .attr("class", "legend_group");

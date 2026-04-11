@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.8.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-8d9da62bee9da6aa885980f9cd31eabd"}, "mark": {"type": "line", "point": true}, "encoding": {"color": {"field": "Metric", "title": "Metric", "type": "nominal"}, "tooltip": [{"field": "year", "type": "quantitative"}, {"field": "Metric", "type": "nominal"}, {"field": "Value", "format": ".2f", "type": "quantitative"}], "x": {"field": "year", "title": "Year", "type": "ordinal"}, "y": {"field": "Value", "title": "Percentage", "type": "quantitative"}}, "height": 400, "title": "Graduation Rates vs. Socioeconomic Trends Over Time in Massachusetts", "width": 600, "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json", "datasets": {"data-8d9da62bee9da6aa885980f9cd31eabd": [{"year": 2017, "Metric": "Graduation Rate", "Value": 84.18984375000001}, {"year": 2018, "Metric": "Graduation Rate", "Value": 84.03367875647669}, {"year": 2019, "Metric": "Graduation Rate", "Value": 85.0925831202046}, {"year": 2020, "Metric": "Graduation Rate", "Value": 85.74607329842932}, {"year": 2021, "Metric": "Graduation Rate", "Value": 85.6579081632653}, {"year": 2022, "Metric": "Graduation Rate", "Value": 85.80525}, {"year": 2017, "Metric": "Low Income %", "Value": 43.35666860803727}, {"year": 2018, "Metric": "Low Income %", "Value": 43.35666860803727}, {"year": 2019, "Metric": "Low Income %", "Value": 43.35666860803727}, {"year": 2020, "Metric": "Low Income %", "Value": 43.35666860803727}, {"year": 2021, "Metric": "Low Income %", "Value": 43.35666860803727}, {"year": 2022, "Metric": "Low Income %", "Value": 42.92618914381646}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>

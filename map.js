@@ -341,24 +341,28 @@ function make_map(csv_data, geo_data) {
                 };
             }
 
+            // graduation rate: cohort-weighted
             if (!isNaN(d.grad_rate) && !isNaN(d.cohort) && d.cohort > 0) {
                 district_sums[code].grad_weighted_sum += d.grad_rate * d.cohort;
                 district_sums[code].grad_cohort_sum += d.cohort;
             }
 
-            if (!isNaN(d.econ)) {
-                district_sums[code].econ_weighted_sum += d.econ;
-                district_sums[code].econ_count += 1;
+            // economically disadvantaged: cohort-weighted
+            if (!isNaN(d.econ) && !isNaN(d.cohort) && d.cohort > 0) {
+                district_sums[code].econ_weighted_sum += d.econ * d.cohort;
+                district_sums[code].econ_count += d.cohort;
             }
 
-            if (!isNaN(d.high_needs)) {
-                district_sums[code].high_needs_weighted_sum += d.high_needs;
-                district_sums[code].high_needs_count += 1;
+            // high needs: cohort-weighted
+            if (!isNaN(d.high_needs) && !isNaN(d.cohort) && d.cohort > 0) {
+                district_sums[code].high_needs_weighted_sum += d.high_needs * d.cohort;
+                district_sums[code].high_needs_count += d.cohort;
             }
 
-            if (!isNaN(d.english)) {
-                district_sums[code].english_weighted_sum += d.english;
-                district_sums[code].english_count += 1;
+            // english learners: cohort-weighted
+            if (!isNaN(d.english) && !isNaN(d.cohort) && d.cohort > 0) {
+                district_sums[code].english_weighted_sum += d.english * d.cohort;
+                district_sums[code].english_count += d.cohort;
             }
         });
 

@@ -195,7 +195,6 @@ function draw_legend(color_scale, min_rate, max_rate) {
         .attr("stroke", "#333")
         .attr("stroke-width", 0.5);
 
-    // use the actual min/max from the data as legend domain
     let legend_scale = d3.scaleLinear()
         .domain([min_rate, max_rate])
         .range([legend_x, legend_x + legend_width]);
@@ -447,9 +446,7 @@ function make_map(csv_data, geo_data) {
                             "Economically Disadvantaged: " + (!isNaN(match.econ) ? match.econ.toFixed(1) + "%" : "Not reported for this year") + "<br>" +
                             "High Needs: " + (!isNaN(match.high_needs) ? match.high_needs.toFixed(1) + "%" : "N/A") + "<br>" +
                             "English Learners: " + (!isNaN(match.english) ? match.english.toFixed(1) + "%" : "N/A")
-                        )
-                        .style("left", (event.pageX + 12) + "px")
-                        .style("top", (event.pageY + 12) + "px");
+                        );
                 } else {
                     tooltip
                         .style("opacity", 1)
@@ -457,15 +454,45 @@ function make_map(csv_data, geo_data) {
                             "<strong>" + geo_name + "</strong><br>" +
                             "District Code: " + code + "<br>" +
                             "No graduation data available"
-                        )
-                        .style("left", (event.pageX + 12) + "px")
-                        .style("top", (event.pageY + 12) + "px");
+                        );
                 }
+
+                let tooltip_width = tooltip.node().offsetWidth;
+                let tooltip_height = tooltip.node().offsetHeight;
+
+                let x = event.pageX + 12;
+                let y = event.pageY + 12;
+
+                if (x + tooltip_width > window.innerWidth) {
+                    x = event.pageX - tooltip_width - 12;
+                }
+
+                if (y + tooltip_height > window.innerHeight) {
+                    y = event.pageY - tooltip_height - 12;
+                }
+
+                tooltip
+                    .style("left", x + "px")
+                    .style("top", y + "px");
             })
             .on("mousemove", function(event) {
+                let tooltip_width = tooltip.node().offsetWidth;
+                let tooltip_height = tooltip.node().offsetHeight;
+
+                let x = event.pageX + 12;
+                let y = event.pageY + 12;
+
+                if (x + tooltip_width > window.innerWidth) {
+                    x = event.pageX - tooltip_width - 12;
+                }
+
+                if (y + tooltip_height > window.innerHeight) {
+                    y = event.pageY - tooltip_height - 12;
+                }
+
                 tooltip
-                    .style("left", (event.pageX + 12) + "px")
-                    .style("top", (event.pageY + 12) + "px");
+                    .style("left", x + "px")
+                    .style("top", y + "px");
             })
             .on("mouseout", function() {
                 d3.select(this)

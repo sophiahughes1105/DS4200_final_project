@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MA School Districts: Graduation Rate</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,6 +38,7 @@
 
         #map-container {
             position: relative;
+            overflow: visible;
         }
 
         #tooltip {
@@ -49,9 +51,13 @@
             opacity: 0;
             font-size: 13px;
             line-height: 1.5;
+            max-width: 220px;
+            z-index: 9999;
+            white-space: normal;
         }
     </style>
 </head>
+
 <body>
 
     <div id="controls">

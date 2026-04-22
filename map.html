@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA School Districts: Graduation Rate</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #fff;
+        }
+
+        #controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        #controls label {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        #yearSlider {
+            width: 300px;
+            cursor: pointer;
+        }
+
+        #yearLabel {
+            font-size: 15px;
+            font-weight: bold;
+            min-width: 40px;
+        }
+
+        #map-container {
+            position: relative;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <label for="yearSlider">Year:</label>
+        <input type="range" id="yearSlider" />
+        <span id="yearLabel"></span>
+    </div>
+
+    <div id="map-container">
+        <div id="tooltip"></div>
+    </div>
+
+    <script src="map.js"></script>
+
+</body>
+</html>

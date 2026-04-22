@@ -113,21 +113,19 @@ x
     <h3>Graduation Rates by District</h3>
 
     <p>
-        The map below shows graduation rates across Massachusetts school districts. Users can select a year
-        from the dropdown menu and hover over each district to view more detailed district-level information.
+    The map below shows graduation rates across Massachusetts school districts. Users can use the year slider
+    and hover over each district to view more detailed district-level information.
     </p>
 
     <div class="center">
-        <div id="controls">
-            <label for="yearSelect">Select Year:</label>
-            <select id="yearSelect"></select>
-        </div>
-
-        <div id="map-container"></div>
-        <div id="tooltip"></div>
+        <iframe src="map.html"
+            width="950"
+            height="800"
+            frameborder="0"
+            scrolling="no">
+        </iframe>
     </div>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="map.js"></script>
+
 
     <p>
         The map reveals that low graduation rates in Massachusetts are not randomly scattered across the state. They cluster geographically, particularly in central 

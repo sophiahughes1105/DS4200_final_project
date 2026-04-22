@@ -113,15 +113,6 @@ function build_member_town_lookup(geo_data) {
 
 
 // helper for matching a map feature to district data
-//
-// FIX: Steps 1 and 2 now require a valid (non-NaN) grad_rate before returning.
-// Elementary-only districts (K-8 towns like Boxford, Lincoln, Sudbury) exist in
-// district_data with NaN grad_rates, which previously short-circuited the lookup
-// before step 3 could route them to their regional HS district (Masconomet,
-// Lincoln-Sudbury, etc.). Now those towns fall through to the member-town lookup
-// and correctly inherit the regional district's graduation data.
-// Step 4 is a safety net that returns any match without grad data as a last resort,
-// preserving tooltip info for districts that genuinely have no graduation data.
 function get_match_for_feature(feature, district_data, district_data_by_name, member_town_to_regional_code) {
     let code = String(feature.properties.ORG4CODE || "").padStart(4, "0");
     let geo_name = feature.properties.DISTRICT_N || "";
@@ -138,14 +129,12 @@ function get_match_for_feature(feature, district_data, district_data_by_name, me
     }
 
     // 3. member-town -> regional district fallback
-    // handles towns like Boxford -> Masconomet, Lincoln/Sudbury -> Lincoln-Sudbury
     let regional_code = member_town_to_regional_code[clean_geo_name];
     if (regional_code && district_data[regional_code]) {
         return district_data[regional_code];
     }
 
     // 4. last resort: return any match even without grad data
-    // (preserves tooltip info for districts that genuinely have no graduation data)
     if (district_data[code]) return district_data[code];
     if (district_data_by_name[clean_geo_name]) return district_data_by_name[clean_geo_name];
 
@@ -160,7 +149,7 @@ function draw_legend(color_scale, min_rate, max_rate) {
     let legend_width = 240;
     let legend_height = 16;
     let legend_x = 40;
-    let legend_y = 70; // shifted down from 40 to give title breathing room
+    let legend_y = 70;
 
     let legend_group = svg.append("g")
         .attr("class", "legend_group");
@@ -206,6 +195,7 @@ function draw_legend(color_scale, min_rate, max_rate) {
         .attr("stroke", "#333")
         .attr("stroke-width", 0.5);
 
+    // use the actual min/max from the data as legend domain
     let legend_scale = d3.scaleLinear()
         .domain([min_rate, max_rate])
         .range([legend_x, legend_x + legend_width]);
@@ -246,20 +236,6 @@ function make_map(csv_data, geo_data) {
         }
     });
 
-    console.log(
-        "Metric parse check:",
-        csv_data.slice(0, 15).map(function(d) {
-            return {
-                school: d["School Name"],
-                year: d.year,
-                grad_rate: d.grad_rate,
-                econ: d.econ,
-                high_needs: d.high_needs,
-                english: d.english
-            };
-        })
-    );
-
     // keep rows with valid district code and year
     let grad_data = csv_data.filter(function(d) {
         return !isNaN(d.year) && d.org4 !== null;
@@ -280,23 +256,17 @@ function make_map(csv_data, geo_data) {
         return a - b;
     });
 
-    let year_select = d3.select("#yearSelect");
+    // set up slider
+    let year_slider = d3.select("#yearSlider")
+        .attr("min", 0)
+        .attr("max", years.length - 1)
+        .attr("step", 1)
+        .attr("value", years.length - 1);
 
-    year_select.selectAll("option").remove();
-
-    year_select.selectAll("option")
-        .data(years)
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
+    let year_label = d3.select("#yearLabel");
 
     let selected_year = years[years.length - 1];
-    year_select.property("value", selected_year);
+    year_label.text(selected_year);
 
     // projected coordinates from MassGIS
     let projection = d3.geoIdentity()
@@ -306,12 +276,12 @@ function make_map(csv_data, geo_data) {
     let path = d3.geoPath().projection(projection);
 
     let member_town_to_regional_code = build_member_town_lookup(geo_data);
-    console.log("Member town lookup:", member_town_to_regional_code);
 
     update_map(selected_year);
 
-    year_select.on("change", function() {
-        selected_year = +this.value;
+    year_slider.on("input", function() {
+        selected_year = years[+this.value];
+        year_label.text(selected_year);
         update_map(selected_year);
     });
 
@@ -410,43 +380,6 @@ function make_map(csv_data, geo_data) {
             }
         }
 
-        // debug null districts
-        let no_match = [];
-        let no_grad_rate = [];
-
-        geo_data.features.forEach(function(d) {
-            let code = String(d.properties.ORG4CODE || "").padStart(4, "0");
-            let geo_name = d.properties.DISTRICT_N;
-
-            let match = get_match_for_feature(
-                d,
-                district_data,
-                district_data_by_name,
-                member_town_to_regional_code
-            );
-
-            if (!match) {
-                no_match.push({
-                    name: geo_name,
-                    code: code
-                });
-            } else if (isNaN(match.grad_rate)) {
-                no_grad_rate.push({
-                    name: geo_name,
-                    code: code
-                });
-            }
-        });
-
-        console.log("NO MATCH (join issue):", no_match);
-        console.log("MATCH BUT NO DATA:", no_grad_rate);
-        console.log("NULL DISTRICT NAMES:", no_match.map(function(d) {
-            return d.name;
-        }));
-        console.log("NO DATA DISTRICT NAMES:", no_grad_rate.map(function(d) {
-            return d.name;
-        }));
-
         let grad_rates = [];
         for (let code in district_data) {
             if (!isNaN(district_data[code].grad_rate)) {
@@ -457,14 +390,13 @@ function make_map(csv_data, geo_data) {
         let min_rate = d3.min(grad_rates);
         let max_rate = d3.max(grad_rates);
 
-        console.log("Min grad rate:", min_rate);
-        console.log("Max grad rate:", max_rate);
+        console.log("Min grad rate:", min_rate, "Max grad rate:", max_rate);
 
+        // single-color sequential blue scale
+        // low grad rate = light blue, high grad rate = dark blue
         let color_scale = d3.scaleSequential()
             .domain([min_rate, max_rate])
-            .interpolator(function(t) {
-                return d3.interpolateViridis(1 - t);
-            });
+            .interpolator(d3.interpolateBlues);
 
         draw_legend(color_scale, min_rate, max_rate);
 
